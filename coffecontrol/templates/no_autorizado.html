@@ -1,0 +1,10 @@
+{# templates/no_autorizado.html #}
+{% extends "base.html" %}
+{% block title %}Acceso Denegado{% endblock %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h2 class="text-danger">🚫 Acceso denegado</h2>
+    <p>No tienes permisos para acceder a esta sección.</p>
+    <a href="{% url 'inicio' %}" class="btn btn-primary">Volver al inicio</a>
+</div>
+{% endblock %}
