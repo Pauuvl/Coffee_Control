@@ -45,5 +45,3 @@ python manage.py createsuperuser
 ## Online Deployment: 
 The project is also deployed on PythonAnywhere and can be accessed here:  
 https://kadiha.pythonanywhere.com/
-```
-
