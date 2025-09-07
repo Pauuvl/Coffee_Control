@@ -42,4 +42,8 @@ You can also create a **superuser** to access Django’s admin panel with full d
 ```
 python manage.py createsuperuser
 ```
+## Online Deployment: 
+The project is also deployed on PythonAnywhere and can be accessed here:  
+https://kadiha.pythonanywhere.com/
+```
 
