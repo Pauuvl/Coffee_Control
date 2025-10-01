@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Gestión de Órdenes</h1>
+        <a href="{% url 'producto:menu' %}" class="btn btn-primary">
+           ➕ Nueva Orden
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <select class="form-select" id="filtro-estado">
+                <option value="todas">Todas las órdenes</option>
+                <option value="pendiente" selected>Pendientes</option>
+                <option value="entregado">Entregadas</option>
+                <option value="cancelado">Canceladas</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de órdenes -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th># Orden</th>
+                            <th>Mesero</th>
+                            <th>Tipo</th>
+                            <th>Cliente/Mesa</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for orden in ordenes %}
+                        <tr data-estado="{{ orden.estado }}">
+                            <td><strong>#{{ orden.id }}</strong></td>
+                            <td>{{ orden.mesero.get_full_name }}</td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ orden.get_tipo_pedido_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if orden.tipo_pedido == 'comer' %}
+                                    Mesa {{ orden.numero_mesa }}
+                                {% else %}
+                                    {{ orden.nombre_cliente }}
+                                {% endif %}
+                            </td>
+                            <td>${{ orden.total }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if orden.estado == 'pendiente' %}bg-warning
+                                    {% elif orden.estado == 'preparando' %}bg-info
+                                    {% elif orden.estado == 'listo' %}bg-success
+                                    {% elif orden.estado == 'entregado' %}bg-secondary
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ orden.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>{{ orden.creado|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'ordenes:detalle_orden' orden.id %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    👀 Ver
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <p class="text-muted mb-0">No hay órdenes registradas</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr id="no-results-row" style="display: none;">
+                            <td colspan="8" class="text-center py-4">
+                                <p class="text-muted mb-0">No se encontraron órdenes con el estado seleccionado.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<!--Logica del filtro de las ordenes-->
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroEstado = document.getElementById('filtro-estado');
+    const filasOrdenes = document.querySelectorAll('tbody tr[data-estado]');
+    const noResultsRow = document.getElementById('no-results-row');
+
+    function aplicarFiltro() {
+        const estadoSeleccionado = filtroEstado.value;
+        let filasVisibles = 0;
+
+        filasOrdenes.forEach(fila => {
+            const estadoFila = fila.dataset.estado;
+            
+            if (estadoSeleccionado === 'todas' || estadoSeleccionado === estadoFila) {
+                fila.style.display = ''; // Muestra la fila
+                filasVisibles++;
+            } else {
+                fila.style.display = 'none'; // Ocultamos la fila
+            }
+        });
+
+        // Mostramos u olcultamos si no se enccuentran resultados
+        noResultsRow.style.display = (filasVisibles === 0 && filasOrdenes.length > 0) ? '' : 'none';
+    }
+    //Ponemos a funcionar el filtro
+    filtroEstado.addEventListener('change', aplicarFiltro);
+    aplicarFiltro(); 
+});
+</script>
+{% endblock %}

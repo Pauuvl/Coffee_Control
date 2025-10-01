@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Orden #{{ orden.id }}</h1>
+        <span class="badge bg-{% if orden.estado == 'pendiente' %}warning
+                             {% elif orden.estado == 'preparando' %}info
+                             {% elif orden.estado == 'listo' %}success
+                             {% elif orden.estado == 'entregado' %}primary
+                             {% else %}danger{% endif %} fs-6">
+            {{ orden.get_estado_display }}
+        </span>
+    </div>
+
+    <div class="row">
+        <!-- Información de la orden -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información de la Orden</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Mesero:</strong> {{ orden.mesero.get_full_name }}</p>
+                    <p><strong>Tipo:</strong> {{ orden.get_tipo_pedido_display }}</p>
+                    <p><strong>{% if orden.tipo_pedido == 'comer' %}Mesa{% else %}Cliente{% endif %}:</strong> 
+                       {{ orden.numero_mesa|default:orden.nombre_cliente }}</p>
+                    <p><strong>Total:</strong> ${{ orden.total }}</p>
+                    <p><strong>Fecha:</strong> {{ orden.creado|date:"d/m/Y H:i" }}</p>
+                    {% if orden.comentarios %}
+                    <p><strong>Comentarios:</strong> {{ orden.comentarios }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos de la orden -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Productos</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in orden.items.all %}
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <div>
+                            <h6 class="mb-0">{{ item.producto.nombre }}</h6>
+                            <small>Cantidad: {{ item.cantidad }}</small>
+                            {% if item.notas %}
+                            <br>
+                            <small class="text-muted">Notas: {{ item.notas }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <span>${{ item.precio }}</span>
+                            <br>
+                            <small>Subtotal: ${{ item.get_subtotal }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+                        <strong>Total:</strong>
+                        <strong>${{ orden.total }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Botones para cambiar el estado del pedido-->
+    {% if request.user.rol == 'waiter' %}
+    <div class="mt-4 d-flex gap-2">
+        {% if orden.estado != 'entregado' and orden.estado != 'cancelado' %}
+        <form action="{% url 'ordenes:marcar_entregado' orden.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Marcar como Entregado
+            </button>
+        </form>
+        {% endif %}
+
+        {% if orden.estado != 'cancelado' %}
+        <form action="{% url 'ordenes:cancelar_orden' orden.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de cancelar esta orden? Esta acción no se puede deshacer.')">
+                <i class="bi bi-x-circle"></i> Cancelar Orden
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+
+
+
+    <div class="mt-4">
+        <a href="{% url 'ordenes:listar_ordenes' %}" class="btn btn-secondary">
+            ← Volver a la lista
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Control</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="/static/images/coffeecontrol.png" alt="Logo" height="40" class="d-inline-block align-text-top">
+                Coffee Control
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'producto:menu' %}">Menú</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'ordenes:listar_ordenes' %}">Mis Órdenes</a>
+                    </li>
+                    {% if user.rol == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'producto:gestion_productos' %}">Gestionar Productos</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <!-- Menú de Administración para admins -->
+                    {% if user.rol == 'admin' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-gear-fill"></i> Administración
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'usuarios:registro_mesero' %}">
+                                <i class="bi bi-person-plus"></i> Registrar Mesero
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:lista_meseros' %}">
+                                <i class="bi bi-people"></i> Ver Meseros
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/" target="_blank">
+                                <i class="bi bi-speedometer2"></i> Panel Admin
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Carrito solo para meseros -->
+                    <li class="nav-item">
+                        {% if user.rol == 'waiter' %}
+                        <a class="nav-link position-relative" href="{% url 'producto:ver_carrito' %}">
+                            <i class="bi bi-cart3"></i>
+                            <span class="cart-badge" id="cart-count">0</span>
+                        </a>
+                        {% endif %}
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ user.first_name }} {{ user.last_name }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><span class="dropdown-item-text">
+                                <small>{{ user.get_rol_display }}</small>
+                            </span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'usuarios:login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mostrar mensajes -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Actualizar contador del carrito solo para meseros
+        function actualizarContadorCarrito() {
+            {% if user.rol == 'waiter' %}
+            fetch('{% url "producto:obtener_contador_carrito" %}')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const cartCount = document.getElementById('cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = data.contador || 0;
+                    }
+                })
+                .catch(error => {
+                    console.warn('Error al obtener contador del carrito:', error);
+                    const cartCount = document.getElementById('cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = '0';
+                    }
+                });
+            {% endif %}
+        }
+        
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', actualizarContadorCarrito);
+    </script>
+    
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>
