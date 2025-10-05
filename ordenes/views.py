@@ -78,8 +78,14 @@ def listar_ordenes(request):
     if request.user.rol == 'waiter':
         ordenes = ordenes.filter(mesero=request.user) #El mesero solo ve sus propias ordenes
 
+    # Filtrado por estado
+    estado_filtro = request.GET.get('estado', 'todas')
+    if estado_filtro != 'todas':
+        ordenes = ordenes.filter(estado=estado_filtro)
+
     return render(request, 'ordenes/lista_ordenes.html', {
-        'ordenes': ordenes
+        'ordenes': ordenes,
+        'estado_actual': estado_filtro
     })
 
 @login_required # 
@@ -90,3 +96,23 @@ def detalle_orden(request, orden_id):
         return redirect('ordenes:listar_ordenes') 
 
     return render(request, 'ordenes/detalle_orden.html', {'orden': orden})
+
+@login_required
+def actualizar_estado_orden(request, orden_id, nuevo_estado):
+    orden = get_object_or_404(Orden, id=orden_id)
+
+    # Aquí se podría añadir una lógica de permisos más compleja.
+    # Por ejemplo, solo los administradores pueden cancelar, 
+    # y solo los meseros dueños de la orden pueden marcar como entregada.
+    if request.user.rol not in ['admin', 'waiter']:
+        messages.error(request, "No tienes permisos para cambiar el estado de esta orden.")
+        return redirect('ordenes:listar_ordenes')
+
+    if nuevo_estado in [estado[0] for estado in Orden.ESTADOS]:
+        orden.estado = nuevo_estado
+        orden.save()
+        messages.success(request, f"El estado de la orden #{orden.id} ha sido actualizado a '{orden.get_estado_display()}'.")
+    else:
+        messages.error(request, "Estado no válido.")
+
+    return redirect('ordenes:listar_ordenes')

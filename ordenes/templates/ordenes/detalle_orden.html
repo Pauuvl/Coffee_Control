@@ -68,10 +68,17 @@
         </div>
     </div>
 
-    <div class="mt-4">
+    <div class="mt-4 d-flex justify-content-between">
         <a href="{% url 'ordenes:listar_ordenes' %}" class="btn btn-secondary">
             ← Volver a la lista
         </a>
+        
+        {% if orden.estado == 'pendiente' %}
+        <div class="d-flex gap-2">
+            <a href="{% url 'ordenes:actualizar_estado_orden' orden.id 'entregado' %}" class="btn btn-success">Orden entregada</a>
+            <a href="{% url 'ordenes:actualizar_estado_orden' orden.id 'cancelado' %}" class="btn btn-danger">Cancelar Orden</a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

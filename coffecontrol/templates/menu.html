@@ -13,12 +13,7 @@
         <div class="col-md-4 text-end">
             <!-- Mostrar carrito solo para meseros, no para admins -->
             {% if user.rol != 'admin' and not user.is_superuser and not user.is_staff %}
-            <a href="{% url 'producto:ver_carrito' %}" class="btn btn-coffee position-relative">
-                <i class="bi bi-cart3"></i> Ver Carrito
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">
-                    0
-                </span>
-            </a>
+        
             {% endif %}
         </div>
     </div>

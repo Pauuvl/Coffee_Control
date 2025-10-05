@@ -14,11 +14,10 @@
     <div class="row mb-4">
         <div class="col-md-4">
             <select class="form-select" id="filtro-estado">
-                <option value="todas">Todas las órdenes</option>
-                <option value="pendiente">Pendientes</option>
-                <option value="preparando">En preparación</option>
-                <option value="listo">Listas</option>
-                <option value="entregado">Entregadas</option>
+                <option value="todas" {% if estado_actual == 'todas' %}selected{% endif %}>Todas las órdenes</option>
+                <option value="pendiente" {% if estado_actual == 'pendiente' %}selected{% endif %}>Pendientes</option>
+                <option value="entregado" {% if estado_actual == 'entregado' %}selected{% endif %}>Entregadas</option>
+                <option value="cancelado" {% if estado_actual == 'cancelado' %}selected{% endif %}>Canceladas</option>
             </select>
         </div>
     </div>
@@ -89,4 +88,15 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    document.getElementById('filtro-estado').addEventListener('change', function() {
+        var estado = this.value;
+        var url = new URL(window.location.href);
+        url.searchParams.set('estado', estado);
+        window.location.href = url.toString();
+    });
+</script>
+{% endblock %}
 {% endblock %}

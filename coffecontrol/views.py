@@ -15,7 +15,7 @@ def inicio(request):
             creado__date=hoy  
         ).count()
     
-    return render(request, 'inicio.html', context)
+    return render(request, 'menu.html', context)
 
 def no_autorizado(request):
     return render(request, 'no_autorizado.html')
@@ -27,3 +27,6 @@ def redireccionar(request):
     elif request.user.rol == 'waiter':
         return redirect('producto:menu')  #Meseros van al menú
     return redirect('inicio')
+
+def inicio_sesion(request):
+    return render(request, 'inicio.html')
