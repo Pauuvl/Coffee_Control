@@ -29,6 +29,7 @@ def menu(request):
     })
 
 @login_required
+@login_required
 def ver_carrito(request):
     items_carrito = ItemCarrito.objects.filter(usuario=request.user)
     
@@ -45,10 +46,17 @@ def ver_carrito(request):
         'total_carrito': total_carrito,
         'impuestos': impuestos,
         'total_general': total_general,
-        'total_productos': total_productos,  # Nuevo campo
+        'total_productos': total_productos,
     }
+
+    # 🔹 Si la solicitud es AJAX, devolver solo el HTML parcial del carrito flotante
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'productos/carrito_contenido.html', context)
     
+    # 🔹 Si es una vista normal (URL /carrito/), se muestra la página completa
     return render(request, 'productos/carrito.html', context)
+
+    
 @login_required
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)

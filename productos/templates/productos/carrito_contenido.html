@@ -1,0 +1,90 @@
+{% load static %}
+
+{% if items_carrito %}
+<table class="table table-striped align-middle">
+  <thead class="table-dark">
+    <tr>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Cantidad</th>
+      <th>Subtotal</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items_carrito %}
+    <tr>
+      <td>
+        <div class="d-flex align-items-center">
+          {% if item.producto.imagen %}
+            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" width="60" height="60" class="rounded me-2">
+          {% endif %}
+          <div>
+            <strong>{{ item.producto.nombre }}</strong>
+            <div class="small text-muted">{{ item.producto.descripcion|truncatewords:8 }}</div>
+          </div>
+        </div>
+      </td>
+
+      <td>${{ item.producto.precio|floatformat:0 }}</td>
+
+      <td>
+        <div class="d-flex align-items-center">
+          <!-- Decrement -->
+          <form action="{% url 'producto:actualizar_cantidad' item.id %}" method="post" class="d-inline me-1">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="decrement">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+          </form>
+
+          <span class="mx-2">{{ item.cantidad }}</span>
+
+          <!-- Increment -->
+          <form action="{% url 'producto:actualizar_cantidad' item.id %}" method="post" class="d-inline ms-1">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="increment">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+          </form>
+        </div>
+      </td>
+
+      <td>${{ item.subtotal|floatformat:0 }}</td>
+
+      <td>
+        <!-- Eliminar el item (POST con CSRF) -->
+        <form action="{% url 'producto:eliminar_del_carrito' item.id %}" method="post" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+            <i class="bi bi-trash"></i>
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="text-end mt-3">
+  <p><strong>Subtotal:</strong> ${{ total_carrito|floatformat:0 }}</p>
+  <p><strong>Impuestos (10%):</strong> ${{ impuestos|floatformat:0 }}</p>
+  <p><strong>Total:</strong> <span class="text-success">${{ total_general|floatformat:0 }}</span></p>
+
+  <div class="d-flex justify-content-end gap-2 mt-2">
+    <a href="{% url 'producto:menu' %}" class="btn btn-outline-secondary">Seguir comprando</a>
+
+    <form action="{% url 'producto:vaciar_carrito' %}" method="post" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">Vaciar carrito</button>
+    </form>
+
+    <a href="{% url 'producto:procesar_pedido' %}" class="btn btn-success">Procesar pedido</a>
+  </div>
+</div>
+
+{% else %}
+<div class="text-center text-muted py-4">
+  <i class="bi bi-cart-x display-4 d-block mb-3"></i>
+  <p>Tu carrito está vacío.</p>
+  <a href="{% url 'producto:menu' %}" class="btn btn-outline-dark">Ir a la tienda</a>
+</div>
+{% endif %}
