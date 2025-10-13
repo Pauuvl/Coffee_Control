@@ -12,7 +12,7 @@ Open a terminal (for example, PowerShell) and navigate to the folder where the p
 
 Example:
 ```
-cd C:\Users\ASUS\Desktop\CoffeeControl
+cd C:\Users\ASUS\Desktop\Coffee_Control
 ```
 
 Once inside the folder, start the development server with:
@@ -22,7 +22,7 @@ python manage.py runserver
 
 If port 8000 is already in use, you can choose another one, for example:
 ```
-python manage.py runserver 8080
+python manage.py runserver 2000
 ```
 
 ## Test Users
@@ -42,6 +42,3 @@ You can also create a **superuser** to access Django’s admin panel with full d
 ```
 python manage.py createsuperuser
 ```
-## Online Deployment: 
-The project is also deployed on PythonAnywhere and can be accessed here:  
-https://kadiha.pythonanywhere.com/
