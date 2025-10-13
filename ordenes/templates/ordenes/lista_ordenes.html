@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">
+            {% if user.rol == 'admin' or user.is_superuser %}
+            Gestión de Órdenes
+            {% else %}
+            Mis Órdenes
+            {% endif %}
+        </h1>
+        {% if user.rol == 'waiter' and not user.is_superuser %}
+        <a href="{% url 'producto:menu' %}" class="btn btn-primary">
+           <i class="bi bi-plus-circle"></i> Nueva Orden
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <select class="form-select" id="filtro-estado">
+                <option value="todas" {% if estado_actual == 'todas' %}selected{% endif %}>Todas las órdenes</option>
+                <option value="pendiente" {% if estado_actual == 'pendiente' %}selected{% endif %}>Pendientes</option>
+                <option value="entregado" {% if estado_actual == 'entregado' %}selected{% endif %}>Entregadas</option>
+                <option value="cancelado" {% if estado_actual == 'cancelado' %}selected{% endif %}>Canceladas</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de órdenes -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th># Orden</th>
+                            {% if user.rol == 'admin' or user.is_superuser %}
+                            <th>Mesero</th>
+                            {% endif %}
+                            <th>Tipo</th>
+                            <th>Cliente/Mesa</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for orden in ordenes %}
+                        <tr>
+                            <td><strong>#{{ orden.id }}</strong></td>
+                            
+                            {% if user.rol == 'admin' or user.is_superuser %}
+                            <td>{{ orden.mesero.username }}</td>
+                            {% endif %}
+                            
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ orden.get_tipo_pedido_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if orden.tipo_pedido == 'comer' %}
+                                    Mesa {{ orden.numero_mesa }}
+                                {% else %}
+                                    {{ orden.nombre_cliente }}
+                                {% endif %}
+                            </td>
+                            <td>${{ orden.total }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if orden.estado == 'pendiente' %}bg-warning
+                                    {% elif orden.estado == 'entregado' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ orden.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>{{ orden.creado|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'ordenes:detalle_orden' orden.id %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    Ver
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if user.rol == 'admin' or user.is_superuser %}8{% else %}7{% endif %}" class="text-center py-4">
+                                <p class="text-muted">No hay órdenes registradas</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Filtro de estado
+document.getElementById('filtro-estado').addEventListener('change', function() {
+    const estado = this.value;
+    const url = new URL(window.location.href);
+    
+    if (estado === 'todas') {
+        url.searchParams.delete('estado');
+    } else {
+        url.searchParams.set('estado', estado);
+    }
+    
+    window.location.href = url.toString();
+});
+</script>
+{% endblock %}
+{% endblock %}

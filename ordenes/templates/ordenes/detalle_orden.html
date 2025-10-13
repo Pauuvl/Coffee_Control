@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Modal de confirmación para órdenes -->
+    <div class="modal fade" id="confirmOrdenModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmOrdenModalTitle">Confirmar Acción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="confirmOrdenModalBody">
+                    ¿Estás seguro de realizar esta acción?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" class="btn btn-primary" id="confirmOrdenModalAction">Aceptar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Orden #{{ orden.id }}</h1>
+        <span class="badge bg-{% if orden.estado == 'pendiente' %}warning
+                             {% elif orden.estado == 'entregado' %}success
+                             {% else %}danger{% endif %} fs-6">
+            {{ orden.get_estado_display }}
+        </span>
+    </div>
+
+    <div class="row">
+        <!-- Información de la orden -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información de la Orden</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Mesero:</strong> {{ orden.mesero.get_full_name }}</p>
+                    <p><strong>Tipo:</strong> {{ orden.get_tipo_pedido_display }}</p>
+                    <p><strong>{% if orden.tipo_pedido == 'comer' %}Mesa{% else %}Cliente{% endif %}:</strong> 
+                       {{ orden.numero_mesa|default:orden.nombre_cliente }}</p>
+                    <p><strong>Método de Pago:</strong> {{ orden.get_metodo_pago_display }}</p>
+                    <p><strong>Subtotal:</strong> ${{ orden.subtotal }}</p>
+                    <p><strong>Impuestos (10%):</strong> ${{ orden.impuestos }}</p>
+                    <p><strong>Total:</strong> ${{ orden.total }}</p>
+                    <p><strong>Fecha:</strong> {{ orden.creado|date:"d/m/Y H:i" }}</p>
+                    {% if orden.comentarios %}
+                    <p><strong>Comentarios:</strong> {{ orden.comentarios }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos de la orden -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Productos</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in orden.items.all %}
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <div>
+                            <h6 class="mb-0">{{ item.producto.nombre }}</h6>
+                            <small>Cantidad: {{ item.cantidad }}</small>
+                            {% if item.notas %}
+                            <br>
+                            <small class="text-muted">Notas: {{ item.notas }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <span>${{ item.precio }}</span>
+                            <br>
+                            <small>Subtotal: ${{ item.get_subtotal }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-between">
+        <a href="{% url 'ordenes:listar_ordenes' %}" class="btn btn-secondary">
+            Volver a la lista
+        </a>
+        
+        {% if orden.estado == 'pendiente' and user.rol == 'waiter' and orden.mesero == user and not user.is_superuser %}
+        <div class="d-flex gap-2">
+            <a href="#" class="btn btn-success"
+               onclick="mostrarConfirmacionOrden('entregada', {{ orden.id }}, '{{ orden.mesero.username }}')">
+                Orden entregada
+            </a>
+            <a href="#" class="btn btn-danger"
+               onclick="mostrarConfirmacionOrden('cancelada', {{ orden.id }}, '{{ orden.mesero.username }}')">
+                Cancelar Orden
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Función para mostrar confirmación de órdenes
+function mostrarConfirmacionOrden(accion, ordenId, meseroNombre) {
+    let titulo = '';
+    let mensaje = '';
+    let url = '';
+    
+    if (accion === 'entregada') {
+        titulo = 'Marcar como Entregada';
+        mensaje = `¿Estás seguro de marcar la orden #${ordenId} como entregada?`;
+        url = `{% url 'ordenes:actualizar_estado_orden' 0 'entregado' %}`.replace('0', ordenId);
+    } else if (accion === 'cancelada') {
+        titulo = 'Cancelar Orden';
+        mensaje = `¿Estás seguro de cancelar la orden #${ordenId}? Esta acción no se puede deshacer.`;
+        url = `{% url 'ordenes:actualizar_estado_orden' 0 'cancelado' %}`.replace('0', ordenId);
+    }
+    
+    document.getElementById('confirmOrdenModalTitle').textContent = titulo;
+    document.getElementById('confirmOrdenModalBody').textContent = mensaje;
+    document.getElementById('confirmOrdenModalAction').href = url;
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmOrdenModal'));
+    modal.show();
+}
+</script>
+{% endblock %}
+{% endblock %}

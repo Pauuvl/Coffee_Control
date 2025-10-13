@@ -1,0 +1,44 @@
+<div class="mb-3">
+    <label class="form-label">{{ formulario.nombre.label }}</label>
+    {{ formulario.nombre }}
+    {% if formulario.nombre.errors %}
+    <div class="text-danger">{{ formulario.nombre.errors }}</div>
+    {% endif %}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ formulario.descripcion.label }}</label>
+    {{ formulario.descripcion }}
+    {% if formulario.descripcion.errors %}
+    <div class="text-danger">{{ formulario.descripcion.errors }}</div>
+    {% endif %}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ formulario.precio.label }}</label>
+    {{ formulario.precio }}
+    {% if formulario.precio.errors %}
+    <div class="text-danger">{{ formulario.precio.errors }}</div>
+    {% endif %}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ formulario.categoria.label }}</label>
+    {{ formulario.categoria }}
+    {% if formulario.categoria.errors %}
+    <div class="text-danger">{{ formulario.categoria.errors }}</div>
+    {% endif %}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ formulario.imagen.label }}</label>
+    {{ formulario.imagen }}
+    {% if formulario.imagen.errors %}
+    <div class="text-danger">{{ formulario.imagen.errors }}</div>
+    {% endif %}
+</div>
+
+<div class="mb-3 form-check">
+    {{ formulario.es_disponible }}
+    <label class="form-check-label">{{ formulario.es_disponible.label }}</label>
+</div>

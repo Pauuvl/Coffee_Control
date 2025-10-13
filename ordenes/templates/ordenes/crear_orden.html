@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="fw-bold mb-4">Crear Nueva Orden</h1>
+    
+    <div class="row">
+        <!-- Resumen del Carrito -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div id="resumen-carrito">
+                        {% if request.session.carrito %}
+                            {% for item_data in request.session.carrito %}
+                            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                                <div>
+                                    <h6 class="mb-0">{{ item_data.nombre }}</h6>
+                                    <small>Cantidad: {{ item_data.cantidad }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span>${{ item_data.precio }}</span>
+                                    <br>
+                                    <small>Subtotal: ${{ item_data.total }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Subtotal:</span>
+                                <span>${{ subtotal|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Impuestos (10%):</span>
+                                <span>${{ impuestos|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                                <strong>Total:</strong>
+                                <strong>${{ total_general|floatformat:2 }}</strong>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No hay productos en el carrito</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Orden -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Detalles de la Orden</h5>
+                </div>
+                <div class="card-body">
+                    <form id="form-crear-orden" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Tipo de pedido -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">¿El pedido es para?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipo_pedido" 
+                                       value="comer" id="tipo_comer" checked>
+                                <label class="form-check-label" for="tipo_comer">
+                                    🍽️ Comer aquí
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipo_pedido" 
+                                       value="llevar" id="tipo_llevar">
+                                <label class="form-check-label" for="tipo_llevar">
+                                    🚪 Para llevar
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Campos condicionales -->
+                        <div id="campo-mesa" class="mb-3">
+                            <label class="form-label">Número de Mesa</label>
+                            <input type="number" name="numero_mesa" class="form-control" 
+                                   min="1" max="20" placeholder="Ej: 5" required>
+                        </div>
+
+                        <div id="campo-cliente" class="mb-3" style="display: none;">
+                            <label class="form-label">Nombre del Cliente</label>
+                            <input type="text" name="nombre_cliente" class="form-control" 
+                                   placeholder="Ej: María García">
+                        </div>
+
+                        <!-- Método de Pago -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Método de Pago</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       value="efectivo" id="pago_efectivo" checked>
+                                <label class="form-check-label" for="pago_efectivo">
+                                    💵 Efectivo
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       value="tarjeta_debito" id="pago_tarjeta_debito">
+                                <label class="form-check-label" for="pago_tarjeta_debito">
+                                    💳 Tarjeta Débito
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       value="tarjeta_credito" id="pago_tarjeta_credito">
+                                <label class="form-check-label" for="pago_tarjeta_credito">
+                                    💳 Tarjeta Crédito
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       value="transferencia" id="pago_transferencia">
+                                <label class="form-check-label" for="pago_transferencia">
+                                    📱 Transferencia
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       value="qr" id="pago_qr">
+                                <label class="form-check-label" for="pago_qr">
+                                    📲 QR
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Comentarios Especiales</label>
+                            <textarea name="comentarios" class="form-control" rows="3" 
+                                      placeholder="Ej: Café sin azúcar, pan bien tostado..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                ✅ Confirmar Orden
+                            </button>
+                            <a href="{% url 'producto:menu' %}" class="btn btn-outline-secondary">
+                                ← Seguir agregando productos
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoComer = document.getElementById('tipo_comer');
+    const tipoLlevar = document.getElementById('tipo_llevar');
+    const campoMesa = document.getElementById('campo-mesa');
+    const campoCliente = document.getElementById('campo-cliente');
+
+    function actualizarCampos() {
+        if (tipoComer.checked) {
+            campoMesa.style.display = 'block';
+            campoMesa.querySelector('input').setAttribute('required', 'required');
+            campoCliente.style.display = 'none';
+            campoCliente.querySelector('input').removeAttribute('required');
+        } else {
+            campoMesa.style.display = 'none';
+            campoMesa.querySelector('input').removeAttribute('required');
+            campoCliente.style.display = 'block';
+            campoCliente.querySelector('input').setAttribute('required', 'required');
+        }
+    }
+
+    tipoComer.addEventListener('change', actualizarCampos);
+    tipoLlevar.addEventListener('change', actualizarCampos);
+    
+    // Inicializar
+    actualizarCampos();
+});
+</script>
+{% endblock %}
