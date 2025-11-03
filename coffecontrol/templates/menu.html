@@ -8,7 +8,6 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2>Nuestro Menú</h2>
-            <p class="text-muted">Selecciona una categoría para filtrar los productos</p>
         </div>
         <div class="col-md-4 text-end">
             {% if user.rol != 'admin' and not user.is_superuser and not user.is_staff %}
@@ -17,32 +16,68 @@
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'producto:menu' %}" class="btn btn-outline-coffee {% if not request.GET.categoria %}active{% endif %}">
-                    Todas las categorías
-                </a>
-                {% for categoria in categorias %}
-                <a href="{% url 'producto:menu' %}?categoria={{ categoria.id }}" 
-                class="btn btn-outline-coffee {% if request.GET.categoria == categoria.id|stringformat:'s' %}active{% endif %}">
-                    {{ categoria.nombre }}
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+   <div class="row mb-4">
+  <div class="col-12 d-flex justify-content-center">
+    <form method="get" action="{% url 'producto:menu' %}" class="d-flex align-items-center gap-3 flex-wrap">
 
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="input-group">
-                <input type="text" id="buscadorProductos" class="form-control" placeholder="Buscar producto..." value="{{ query }}">
-                <button class="btn btn-outline-coffee" type="button" onclick="buscarProductos()">
-                    <i class="bi bi-search"></i> Buscar
-                </button>
-            </div>
-        </div>
-    </div>
+      <!-- Select con mensaje dentro -->
+      <select name="categoria" id="categoria" 
+              class="form-select stylish-select shadow-sm border-0"
+              style="min-width: 280px;" onchange="this.form.submit()">
+        
+        <!-- Opción de guía (placeholder) -->
+        <option value="" disabled selected hidden>Seleccione la categoría del producto</option>
+
+        <!-- Opción de ver todo -->
+        <option value="">Todas las categorías</option>
+
+        <!-- Listado de categorías dinámico -->
+        {% for categoria in categorias %}
+          <option value="{{ categoria.id }}" {% if request.GET.categoria == categoria.id|stringformat:'s' %}selected{% endif %}>
+            {{ categoria.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+</div>
+
+
+    <div class="row mb-5">
+  <div class="col-12 d-flex justify-content-center">
+    <form method="get" action="{% url 'producto:menu' %}" class="w-100" style="max-width: 720px;">
+      {# Mantener categoría seleccionada #}
+      {% if request.GET.categoria %}
+        <input type="hidden" name="categoria" value="{{ request.GET.categoria }}">
+      {% endif %}
+
+      <div class="input-group input-group-lg search-pill">
+        <!-- Ícono dentro del input -->
+        <span class="input-group-text search-icon" id="addon-search" aria-hidden="true">
+          <!-- ícono lupa simple en SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+
+        <input
+          type="search"
+          class="form-control search-input"
+          placeholder="Buscar producto..."
+          aria-label="Buscar producto"
+          aria-describedby="addon-search"
+          name="q"
+          value="{{ request.GET.q|default:'' }}"
+          autocomplete="off"
+        >
+        <button class="btn btn-coffee" type="submit">
+          Buscar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
     <!-- Modal de confirmación -->
     <div class="modal fade" id="confirmModal" tabindex="-1">

@@ -111,6 +111,7 @@ CSS STRUCTURE:
     --light-grey-color   : #fafafa;
     --primary-color      : #6995B1;
     --light-primary-color   : #eef1f3;
+    
 }
 
 /* Fonts */
@@ -154,6 +155,28 @@ body {
   --bs-danger-rgb: 249, 235, 231;
   --bs-warning-rgb: 255, 249, 235;
   --bs-info-rgb: 230, 243, 250;
+}
+.btn-coffee {
+  background-color: #A6826A;
+  border-color: #A6826A;
+  color: #fff;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+.btn-coffee:hover {
+  background-color: #8B6B54;
+  border-color: #8B6B54;
+}
+.btn-outline-coffee {
+  color: #A6826A;
+  border-color: #A6826A;
+  transition: all 0.3s ease;
+}
+.btn-outline-coffee:hover {
+  color: #fff;
+  background-color: #A6826A;
+  border-color: #A6826A;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
 }
 .btn-primary {
   --bs-btn-color: #fff;
@@ -243,7 +266,7 @@ body {
   --bs-btn-hover-bg: #ecc9af;
   --bs-btn-hover-border-color: #ecc9af;
   --bs-btn-focus-shadow-rgb: 60,153,110;
-  --bs-btn-active-color: #222;
+  --bs-btn-active-color:  #A6826A;
   --bs-btn-active-bg: #ecc9af;
   --bs-btn-active-border-color: #ecc9af;
   --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);

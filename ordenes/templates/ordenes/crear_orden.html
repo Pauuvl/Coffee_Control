@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <h1 class="fw-bold mb-4">Crear Nueva Orden</h1>
     
     <div class="row">
         <!-- Resumen del Carrito -->
-        <div class="col-md-5">
+        <div class="col-md-5 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Resumen del Pedido</h5>
@@ -16,32 +16,34 @@
                     <div id="resumen-carrito">
                         {% if request.session.carrito %}
                             {% for item_data in request.session.carrito %}
-                            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                                <div>
-                                    <h6 class="mb-0">{{ item_data.nombre }}</h6>
-                                    <small>Cantidad: {{ item_data.cantidad }}</small>
+                            <div class="d-flex justify-content-between cart-item border-bottom">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-semibold">{{ item_data.nombre }}</h6>
+                                    <small class="text-muted">Cantidad: {{ item_data.cantidad }}</small>
                                 </div>
-                                <div class="text-end">
-                                    <span>${{ item_data.precio }}</span>
-                                    <br>
-                                    <small>Subtotal: ${{ item_data.total }}</small>
+                                <div class="text-end ms-3">
+                                    <div class="fw-medium">${{ item_data.precio }}</div>
+                                    <small class="text-muted">Subtotal: ${{ item_data.total }}</small>
                                 </div>
                             </div>
                             {% endfor %}
-                            <div class="d-flex justify-content-between mt-2">
-                                <span>Subtotal:</span>
-                                <span>${{ subtotal|floatformat:2 }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Impuestos (10%):</span>
-                                <span>${{ impuestos|floatformat:2 }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mt-2 pt-2 border-top">
-                                <strong>Total:</strong>
-                                <strong>${{ total_general|floatformat:2 }}</strong>
+                            
+                            <div class="totals-section">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Subtotal:</span>
+                                    <span class="fw-medium">${{ subtotal|floatformat:2 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Impuestos (10%):</span>
+                                    <span class="fw-medium">${{ impuestos|floatformat:2 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between total-row">
+                                    <strong class="fs-5">Total:</strong>
+                                    <strong class="fs-4">${{ total_general|floatformat:2 }}</strong>
+                                </div>
                             </div>
                         {% else %}
-                            <p class="text-muted">No hay productos en el carrito</p>
+                            <p class="text-muted fst-italic">No hay productos en el carrito</p>
                         {% endif %}
                     </div>
                 </div>
@@ -59,86 +61,93 @@
                         {% csrf_token %}
                         
                         <!-- Tipo de pedido -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">¿El pedido es para?</label>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">¿El pedido es para?</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="tipo_pedido" 
                                        value="comer" id="tipo_comer" checked>
                                 <label class="form-check-label" for="tipo_comer">
-                                    🍽️ Comer aquí
+                                    <span class="fs-5">🍽️</span>
+                                    <span>Comer aquí</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="tipo_pedido" 
                                        value="llevar" id="tipo_llevar">
                                 <label class="form-check-label" for="tipo_llevar">
-                                    🚪 Para llevar
+                                    <span class="fs-5">🚪</span>
+                                    <span>Para llevar</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- Campos condicionales -->
-                        <div id="campo-mesa" class="mb-3">
-                            <label class="form-label">Número de Mesa</label>
+                        <div id="campo-mesa" class="mb-4">
+                            <label class="form-label fw-medium">Número de Mesa</label>
                             <input type="number" name="numero_mesa" class="form-control" 
                                    min="1" max="20" placeholder="Ej: 5" required>
                         </div>
 
-                        <div id="campo-cliente" class="mb-3" style="display: none;">
-                            <label class="form-label">Nombre del Cliente</label>
+                        <div id="campo-cliente" class="mb-4" style="display: none;">
+                            <label class="form-label fw-medium">Nombre del Cliente</label>
                             <input type="text" name="nombre_cliente" class="form-control" 
                                    placeholder="Ej: María García">
                         </div>
 
                         <!-- Método de Pago -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Método de Pago</label>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">Método de Pago</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="metodo_pago" 
                                        value="efectivo" id="pago_efectivo" checked>
                                 <label class="form-check-label" for="pago_efectivo">
-                                    💵 Efectivo
+                                    <span class="fs-5">💵</span>
+                                    <span>Efectivo</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="metodo_pago" 
                                        value="tarjeta_debito" id="pago_tarjeta_debito">
                                 <label class="form-check-label" for="pago_tarjeta_debito">
-                                    💳 Tarjeta Débito
+                                    <span class="fs-5">💳</span>
+                                    <span>Tarjeta Débito</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="metodo_pago" 
                                        value="tarjeta_credito" id="pago_tarjeta_credito">
                                 <label class="form-check-label" for="pago_tarjeta_credito">
-                                    💳 Tarjeta Crédito
+                                    <span class="fs-5">💳</span>
+                                    <span>Tarjeta Crédito</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="metodo_pago" 
                                        value="transferencia" id="pago_transferencia">
                                 <label class="form-check-label" for="pago_transferencia">
-                                    📱 Transferencia
+                                    <span class="fs-5">📱</span>
+                                    <span>Transferencia</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="metodo_pago" 
                                        value="qr" id="pago_qr">
                                 <label class="form-check-label" for="pago_qr">
-                                    📲 QR
+                                    <span class="fs-5">📲</span>
+                                    <span>QR</span>
                                 </label>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Comentarios Especiales</label>
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Comentarios Especiales</label>
                             <textarea name="comentarios" class="form-control" rows="3" 
                                       placeholder="Ej: Café sin azúcar, pan bien tostado..."></textarea>
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                ✅ Confirmar Orden
+                                <span class="fs-5">✅</span> Confirmar Orden
                             </button>
                             <a href="{% url 'producto:menu' %}" class="btn btn-outline-secondary">
                                 ← Seguir agregando productos
@@ -151,6 +160,7 @@
     </div>
 </div>
 {% endblock %}
+
 
 {% block extra_js %}
 <script>
