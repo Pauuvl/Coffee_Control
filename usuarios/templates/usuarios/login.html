@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <style>
+        /* Ajustes visuales del login */
+        .auth-wrapper {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #ffffff, var(--coffee-50));
+        overflow: hidden;
+        }
+        .auth-logo {
+        height: 110px;
+        width: auto;
+        display: block;
+        margin: 0 auto 10px auto;
+        }
+        .auth-card {
+        width: 100%;
+        max-width: 400px;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: 16px;
+        padding: 35px 30px;
+        box-shadow: 0 6px 20px rgba(0,0,0,.08);
+        }
+        .btn-coffee {
+        background-color: transparent;
+        border: 2px solid var(--coffee-700);
+        color: var(--coffee-700);
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 10px 0;
+        letter-spacing: 0.5px;
+        transition: all 0.25s ease-in-out;
+            }
+
+        .btn-coffee:hover {
+        background-color: var(--coffee-700);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(139, 69, 19, 0.3);
+        transform: translateY(-2px);
+        }
+        .text-coffee { color: var(--coffee-700); }
+        #particles-js { position: absolute; inset: 0; z-index: 0; }
+        .auth-card, .auth-card * { position: relative; z-index: 1; }
+  </style>
+
+<!-- Fondo general -->
+<div class="auth-wrapper">
+  <!-- Efecto Particles.js (opcional, ver script abajo) -->
+  <div id="particles-js"></div>
+
+  <div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="auth-card shadow">
+      <!-- Logo y título -->
+      <div class="text-center mb-4">
+        <img src="{% static 'images/coffeecontrol.png' %}" alt="Coffee Control" class="auth-logo mb-2">
+        <h3 class="fw-bold text-coffee">Iniciar Sesión</h3>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Formulario -->
+      <form method="post" action="{% url 'usuarios:login' %}" id="loginForm">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3 position-relative">
+          <label class="form-label">Usuario</label>
+          <span class="input-icon"><i class="bi bi-person"></i></span>
+          <input type="text" name="username" class="form-control ps-5" placeholder="Tu usuario" required>
+        </div>
+
+        <div class="form-group mb-4 position-relative">
+          <label class="form-label">Contraseña</label>
+          <span class="input-icon"><i class="bi bi-lock"></i></span>
+          <input type="password" name="password" id="password" class="form-control ps-5 pe-5" placeholder="••••••••" required>
+          <button type="button" class="toggle-pass" tabindex="-1">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+
+        <button type="submit" class="btn btn-coffee w-100 py-2" id="loginBtn">
+          <span class="btn-text">Iniciar Sesión</span>
+          <span class="spinner-border spinner-border-sm ms-2 d-none"></span>
+        </button>
+      </form>
+
+      <div class="text-center mt-4">
+        <p>¿Eres administrador? <a href="{% url 'admin:login' %}" class="text-coffee fw-semibold">Acceder al panel admin</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+  // Mostrar / ocultar contraseña y animación de carga
+  (function(){
+    const pass = document.getElementById('password');
+    const toggle = document.querySelector('.toggle-pass');
+    const form = document.getElementById('loginForm');
+    const btn = document.getElementById('loginBtn');
+    const spinner = btn.querySelector('.spinner-border');
+    const text = btn.querySelector('.btn-text');
+
+    toggle.addEventListener('click', ()=>{
+      const show = pass.type === 'password';
+      pass.type = show ? 'text' : 'password';
+      toggle.innerHTML = show ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+    });
+
+    form.addEventListener('submit', ()=>{
+      btn.disabled = true;
+      spinner.classList.remove('d-none');
+      text.textContent = 'Ingresando...';
+    });
+  })();
+</script>
+
+<!-- Particles.js (opcional) -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+particlesJS("particles-js", {
+  "particles": {
+    "number": { "value": 50, "density": { "enable": true, "value_area": 900 } },
+    "color": { "value": ["#8B5E3C","#A6826A","#c9a36a"] },
+    "shape": { "type": "circle" },
+    "opacity": { "value": 0.25 },
+    "size": { "value": 3, "random": true },
+    "line_linked": { "enable": true, "distance": 160, "color": "#8B5E3C", "opacity": 0.15, "width": 1 },
+    "move": { "enable": true, "speed": 2, "out_mode": "out" }
+  },
+  "interactivity": {
+    "events": { "onhover": { "enable": true, "mode": "grab" } },
+    "modes": { "grab": { "distance": 160, "line_linked": { "opacity": 0.25 } } }
+  },
+  "retina_detect": true
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-coffee text-white">
+                    <h3 class="text-center mb-0">
+                        <i class="bi bi-person-plus"></i> Registrar Nuevo Mesero
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Modal de confirmación -->
+                    <div class="modal fade" id="confirmModal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmModalTitle">Confirmar Registro</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" id="confirmModalBody">
+                                    ¿Estás seguro de crear este mesero?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" form="meseroForm" class="btn btn-primary">Aceptar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" id="meseroForm">
+                        {% csrf_token %}
+                        
+                        {% for field in formulario %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-coffee">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="button" class="btn btn-coffee btn-lg" onclick="mostrarConfirmacionMesero()">
+                                <i class="bi bi-person-plus"></i> Crear Mesero
+                            </button>
+                            <a href="{% url 'usuarios:lista_meseros' %}" class="btn btn-outline-coffee">
+                                <i class="bi bi-arrow-left"></i> Volver a la lista
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function mostrarConfirmacionMesero() {
+    // Validar que todos los campos requeridos estén llenos
+    const form = document.getElementById('meseroForm');
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+
+    for (let field of requiredFields) {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add('is-invalid');
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    }
+
+    if (!isValid) {
+        alert('Por favor, completa todos los campos requeridos.');
+        return;
+    }
+
+    // Mostrar modal de confirmación
+    document.getElementById('confirmModalTitle').textContent = 'Confirmar Registro';
+    document.getElementById('confirmModalBody').textContent = '¿Estás seguro de crear este mesero?';
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
+}
+
+// Aplicar clases Bootstrap a los campos del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const formFields = document.querySelectorAll('input, select');
+    formFields.forEach(field => {
+        if (field.type !== 'checkbox') {
+            field.classList.add('form-control');
+        }
+    });
+});
+</script>
+
+<style>
+.bg-coffee {
+    background-color: #5D4037 !important;
+}
+
+.btn-coffee {
+    background-color: #5D4037;
+    border-color: #5D4037;
+    color: white;
+}
+
+.btn-coffee:hover {
+    background-color: #3E2723;
+    border-color: #3E2723;
+    color: white;
+}
+
+.btn-outline-coffee {
+    color: #5D4037;
+    border-color: #5D4037;
+}
+
+.btn-outline-coffee:hover {
+    background-color: #5D4037;
+    border-color: #5D4037;
+    color: white;
+}
+
+.text-coffee {
+    color: #5D4037 !important;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+</style>
+{% endblock %}
