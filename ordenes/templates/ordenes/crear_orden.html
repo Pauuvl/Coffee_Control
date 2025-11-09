@@ -85,13 +85,13 @@
                         <!-- Campos condicionales -->
                         <div id="campo-mesa" class="mb-4">
                             <label class="form-label fw-medium" style="color: #3a2e1f;">Número de Mesa</label>
-                            <input type="number" name="numero_mesa" class="form-control" 
+                            <input type="number" name="numero_mesa" id="input_numero_mesa" class="form-control" 
                                    min="1" max="20" placeholder="Ej: 5" required>
                         </div>
 
                         <div id="campo-cliente" class="mb-4" style="display: none;">
                             <label class="form-label fw-medium" style="color: #3a2e1f;">Nombre del Cliente</label>
-                            <input type="text" name="nombre_cliente" class="form-control" 
+                            <input type="text" name="nombre_cliente" id="input_nombre_cliente" class="form-control" 
                                    placeholder="Ej: María García">
                         </div>
 
@@ -155,4 +155,42 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoComer = document.getElementById('tipo_comer');
+    const tipoLlevar = document.getElementById('tipo_llevar');
+    const campoMesa = document.getElementById('campo-mesa');
+    const campoCliente = document.getElementById('campo-cliente');
+    const inputMesa = document.getElementById('input_numero_mesa');
+    const inputCliente = document.getElementById('input_nombre_cliente');
+
+    function actualizarCampos() {
+        if (tipoComer.checked) {
+            // Mostrar campo de mesa, ocultar campo de cliente
+            campoMesa.style.display = 'block';
+            campoCliente.style.display = 'none';
+            inputMesa.required = true;
+            inputCliente.required = false;
+            inputCliente.value = '';
+        } else if (tipoLlevar.checked) {
+            // Mostrar campo de cliente, ocultar campo de mesa
+            campoMesa.style.display = 'none';
+            campoCliente.style.display = 'block';
+            inputMesa.required = false;
+            inputCliente.required = true;
+            inputMesa.value = '';
+        }
+    }
+
+    // Escuchar cambios en los radio buttons
+    tipoComer.addEventListener('change', actualizarCampos);
+    tipoLlevar.addEventListener('change', actualizarCampos);
+
+    // Inicializar al cargar la página
+    actualizarCampos();
+});
+</script>
+
 {% endblock %}
+
