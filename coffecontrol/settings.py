@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings
 SECRET_KEY = 'django-insecure-t)^19$)#=c(yuot==9(0)kmzn7^5_^m(dnihgs__or)3^a%qj$'
 DEBUG = True
-ALLOWED_HOSTS = ['13.218.99.246']
+ALLOWED_HOSTS = ['98.93.213.152']
 
 # Application definition
 AUTH_USER_MODEL = 'usuarios.ManejoUsuario'  # Modelo está en app usuarios
