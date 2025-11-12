@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold text-primary mb-4">Coffee Control</h1>
+            <p class="lead text-muted mb-5">
+                Sistema de gestión para cafeterías y restaurantes
+            </p>
+
+            {% if not user.is_authenticated %}
+            <!-- Visitante -->
+            <div class="hero-buttons d-flex gap-3 justify-content-center mt-4">
+                <a href="{% url 'usuarios:login' %}" class="btn btn-primary btn-lg">
+                    Iniciar Sesión
+                </a>
+            </div>
+
+            {% elif user.rol == "admin" %}
+            <!-- Administrador -->
+            <div class="hero-buttons d-flex gap-3 justify-content-center mt-4">
+                <a href="{% url 'usuarios:registro_mesero' %}" class="btn btn-primary btn-lg">
+                    Crear Mesero
+                </a>
+                <a href="{% url 'producto:gestion_productos' %}" class="btn btn-outline-primary btn-lg">
+                    Gestionar Productos
+                </a>
+                <a href="{% url 'usuarios:lista_meseros' %}" class="btn btn-outline-primary btn-lg">
+                    Ver Meseros
+                </a>
+            </div>
+
+            {% elif user.rol == "waiter" %}
+            <!-- Mesero -->
+            <div class="hero-buttons d-flex gap-3 justify-content-center mt-4">
+                <a href="{% url 'producto:menu' %}" class="btn btn-primary btn-lg">
+                    Ver Menú
+                </a>
+                <a href="{% url 'ordenes:listar_ordenes' %}" class="btn btn-outline-primary btn-lg">
+                    Mis Órdenes
+                </a>
+                <a href="{% url 'producto:ver_carrito' %}" class="btn btn-outline-primary btn-lg">
+                    Ver Carrito
+                </a>
+            </div>
+
+            {% else %}
+            <!-- Usuario sin rol definido -->
+            <div class="alert alert-warning">
+                <p>Tu usuario no tiene un rol asignado. Contacta al administrador.</p>
+                <a href="{% url 'usuarios:logout' %}" class="btn btn-warning">
+                    Cerrar Sesión
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Estadísticas rápidas para administradores -->
+            {% if user.is_authenticated and user.rol == "admin" %}
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Meseros</h5>
+                            <p class="card-text display-6">{{ meseros_count|default:0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Productos</h5>
+                            <p class="card-text display-6">{{ productos_count|default:0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Órdenes Hoy</h5>
+                            <p class="card-text display-6">{{ ordenes_hoy_count|default:0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

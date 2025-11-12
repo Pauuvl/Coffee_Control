@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% load static humanize %}
+
+
+{% block content %}
+<div class="container mt-4 mb-5" style="background-color: #f8f3ed; border-radius: 12px; padding: 20px;">
+    <h1 class="fw-bold mb-4 text-center" style="color: #3a2e1f;">Confirmar Nueva Orden</h1>
+    
+    <div class="row justify-content-center">
+        <!-- Resumen del Carrito -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg border-0" style="border-radius: 15px;">
+                <div class="card-header text-white text-center fs-5" style="background-color: #6b4f33; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                    <h5 class="mb-0">🧾 Resumen del Pedido</h5>
+                </div>
+                <div class="card-body" style="background-color: #fffdf9; padding: 30px;">
+                    <div id="resumen-carrito">
+                        {% if request.session.carrito %}
+                            {% for item_data in request.session.carrito %}
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color: #e0d3c1;">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-semibold" style="color: #4a3a28;">{{ item_data.nombre }}</h6>
+                                    <small class="text-muted">Cantidad: {{ item_data.cantidad }}</small>
+                                </div>
+                                <div class="text-end ms-3">
+                                    <div class="fw-medium" style="color: #4a3a28;">${{ item_data.precio|floatformat:2|intcomma }}</div>
+                                    <small class="text-muted">Subtotal: ${{ item_data.total|floatformat:2|intcomma }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            <div class="totals-section mt-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Subtotal:</span>
+                                    <span class="fw-medium" style="color: #3a2e1f;">${{ subtotal|floatformat:2|intcomma }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Impuestos (10%):</span>
+                                    <span class="fw-medium" style="color: #3a2e1f;">${{ impuestos|floatformat:2|intcomma }}</span>
+                                </div>
+                                <hr style="border-color: #d3bfa6;">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <strong class="fs-5" style="color: #3a2e1f;">Total:</strong>
+                                    <strong class="fs-3" style="color: #6b4f33;">${{ total_general|floatformat:2|intcomma }}</strong>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted fst-italic text-center">No hay productos en el carrito</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Orden -->
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0" style="border-radius: 15px;">
+                <div class="card-header text-white text-center fs-5" style="background-color: #6b4f33; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                    <h5 class="mb-0">📝 Detalles de la Orden</h5>
+                </div>
+                <div class="card-body" style="background-color: #fffdf9; padding: 30px;">
+                    <form id="form-crear-orden" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Tipo de pedido -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3" style="color: #3a2e1f;">¿El pedido es para?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="tipo_pedido" 
+                                       value="comer" id="tipo_comer" checked>
+                                <label class="form-check-label" for="tipo_comer" style="color: #3a2e1f;">
+                                    🍽️ Comer aquí
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="tipo_pedido" 
+                                       value="llevar" id="tipo_llevar">
+                                <label class="form-check-label" for="tipo_llevar" style="color: #3a2e1f;">
+                                    🚪 Para llevar
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Campos condicionales -->
+                        <div id="campo-mesa" class="mb-4">
+                            <label class="form-label fw-medium" style="color: #3a2e1f;">Número de Mesa</label>
+                            <input type="number" name="numero_mesa" id="input_numero_mesa" class="form-control" 
+                                   min="1" max="20" placeholder="Ej: 5" required>
+                        </div>
+
+                        <div id="campo-cliente" class="mb-4" style="display: none;">
+                            <label class="form-label fw-medium" style="color: #3a2e1f;">Nombre del Cliente</label>
+                            <input type="text" name="nombre_cliente" id="input_nombre_cliente" class="form-control" 
+                                   placeholder="Ej: María García">
+                        </div>
+
+                        <!-- Método de Pago -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3" style="color: #3a2e1f;">Método de Pago</label>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="metodo_pago" 
+                                       value="efectivo" id="pago_efectivo" checked>
+                                <label class="form-check-label" for="pago_efectivo" style="color: #3a2e1f;">
+                                    💵 Efectivo
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="metodo_pago" 
+                                       value="tarjeta_debito" id="pago_tarjeta_debito">
+                                <label class="form-check-label" for="pago_tarjeta_debito" style="color: #3a2e1f;">
+                                    💳 Tarjeta Débito
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="metodo_pago" 
+                                       value="tarjeta_credito" id="pago_tarjeta_credito">
+                                <label class="form-check-label" for="pago_tarjeta_credito" style="color: #3a2e1f;">
+                                    💳 Tarjeta Crédito
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="metodo_pago" 
+                                       value="transferencia" id="pago_transferencia">
+                                <label class="form-check-label" for="pago_transferencia" style="color: #3a2e1f;">
+                                    📱 Transferencia
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" style="accent-color: #6b4f33;" type="radio" name="metodo_pago" 
+                                       value="qr" id="pago_qr">
+                                <label class="form-check-label" for="pago_qr" style="color: #3a2e1f;">
+                                    📲 QR
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium" style="color: #3a2e1f;">Comentarios Especiales</label>
+                            <textarea name="comentarios" class="form-control" rows="3" 
+                                      placeholder="Ej: Café sin azúcar, pan bien tostado..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-lg text-white" style="background-color: #6b4f33;">
+                                Confirmar Orden
+                            </button>
+                            <a href="{% url 'producto:menu' %}" class="btn btn-outline-secondary">
+                                ← Seguir agregando productos
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoComer = document.getElementById('tipo_comer');
+    const tipoLlevar = document.getElementById('tipo_llevar');
+    const campoMesa = document.getElementById('campo-mesa');
+    const campoCliente = document.getElementById('campo-cliente');
+    const inputMesa = document.getElementById('input_numero_mesa');
+    const inputCliente = document.getElementById('input_nombre_cliente');
+
+    function actualizarCampos() {
+        if (tipoComer.checked) {
+            // Mostrar campo de mesa, ocultar campo de cliente
+            campoMesa.style.display = 'block';
+            campoCliente.style.display = 'none';
+            inputMesa.required = true;
+            inputCliente.required = false;
+            inputCliente.value = '';
+        } else if (tipoLlevar.checked) {
+            // Mostrar campo de cliente, ocultar campo de mesa
+            campoMesa.style.display = 'none';
+            campoCliente.style.display = 'block';
+            inputMesa.required = false;
+            inputCliente.required = true;
+            inputMesa.value = '';
+        }
+    }
+
+    // Escuchar cambios en los radio buttons
+    tipoComer.addEventListener('change', actualizarCampos);
+    tipoLlevar.addEventListener('change', actualizarCampos);
+
+    // Inicializar al cargar la página
+    actualizarCampos();
+});
+</script>
+
+{% endblock %}
+

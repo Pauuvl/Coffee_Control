@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% load static humanize %}
+
+{% block title %}Carrito de Compras - Coffee Control{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Carrito de Compras</h2>
+            
+            {% if items_carrito %}
+            <div class="card">
+                <div class="card-body">
+                    {% for item in items_carrito %}
+                    <div class="row align-items-center mb-3 pb-3 border-bottom">
+                        <div class="col-md-2">
+                            {% if item.producto.imagen %}
+                            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
+                                 class="img-fluid rounded" style="height: 80px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                 style="height: 80px;">
+                                <i class="bi bi-cup-hot fs-4 text-secondary"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6 class="mb-1">{{ item.producto.nombre }}</h6>
+                            <small class="text-muted">{{ item.producto.descripcion|truncatewords:10 }}</small>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <span class="h6">${{ item.producto.precio }}</span>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="d-flex align-items-center">
+                                <form method="post" action="{% url 'producto:actualizar_cantidad' item.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="decrement">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                                </form>
+                                
+                                <span class="mx-2">{{ item.cantidad }}</span>
+                                
+                                <form method="post" action="{% url 'producto:actualizar_cantidad' item.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="increment">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <span class="h6">${{ item.subtotal }}</span>
+                            <form method="post" action="{% url 'producto:eliminar_del_carrito' item.id %}" 
+                                  class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-link text-danger" 
+                                        onclick="return confirm('¿Eliminar este producto?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-cart-x"></i> Tu carrito está vacío.
+                <a href="{% url 'producto:menu' %}" class="alert-link">Ir al menú</a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Productos:</span>
+                        <span>{{ total_productos }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ total_carrito }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Impuestos (10%):</span>
+                        <span>${{ impuestos }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong>${{ total_general }}</strong>
+                    </div>
+                    
+                    {% if items_carrito %}
+                    <form method="post" action="{% url 'producto:procesar_pedido' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-check-circle"></i> Proceder al Pedido
+                        </button>
+                    </form>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'producto:menu' %}" class="btn btn-outline-secondary flex-fill">
+                            <i class="bi bi-arrow-left"></i> Seguir Comprando
+                        </a>
+                        
+                        {% if items_carrito %}
+                        <form method="post" action="{% url 'producto:vaciar_carrito' %}" class="flex-fill">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger w-100" 
+                                    onclick="return confirm('¿Vaciar todo el carrito?')">
+                                <i class="bi bi-trash"></i> Vaciar
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Actualizar contador al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarContadorCarrito();
+});
+</script>
+{% endblock %}

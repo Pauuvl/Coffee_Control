@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="fw-bold mb-4">Nuestro Menú</h1>
+
+    <!-- Filtros por categoría -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <select class="form-select" id="filtroCategoria" onchange="filtrarProductos()">
+                <option value="todas">Todas las categorías</option>
+                {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="gridProductos">
+        {% for producto in productos %}
+        <div class="col producto-item" data-categoria="{{ producto.categoria.id }}">
+            <div class="card h-100 shadow-sm border-0">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" 
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                    <p class="card-text text-muted small">{{ producto.descripcion|truncatewords:15 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h5 mb-0 text-primary">${{ producto.precio }}</span>
+                        
+                        <span class="badge {% if producto.es_disponible %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ producto.es_disponible|yesno:"Disponible,Agotado" }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent border-0">
+                    <div class="d-grid gap-2">
+                        {% if producto.es_disponible %}
+                        <button class="btn btn-primary btn-agregar" 
+                                data-id="{{ producto.id }}"
+                                data-nombre="{{ producto.nombre }}"
+                                data-precio="{{ producto.precio }}"
+                                data-imagen="{% if producto.imagen %}{{ producto.imagen.url }}{% endif %}">
+                            Agregar al pedido
+                        </button>
+                        {% else %}
+                        <button class="btn btn-secondary" disabled>No disponible</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay productos disponibles</h4>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filtrarProductos() {
+    const categoriaId = document.getElementById('filtroCategoria').value;
+    const productos = document.querySelectorAll('.producto-item');
+    
+    productos.forEach(producto => {
+        if (categoriaId === 'todas' || producto.dataset.categoria === categoriaId) {
+            producto.style.display = 'block';
+        } else {
+            producto.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

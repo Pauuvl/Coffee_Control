@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Meseros Registrados</h2>
+        <div>
+            <a href="{% url 'usuarios:registro_mesero' %}" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Nuevo Mesero
+            </a>
+            <a href="/admin/" class="btn btn-outline-secondary" target="_blank">
+                <i class="bi bi-gear"></i> Panel Admin
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre Completo</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Último Login</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mesero in meseros %}
+                        <tr>
+                            <td>{{ mesero.username }}</td>
+                            <td>{{ mesero.first_name }} {{ mesero.last_name }}</td>
+                            <td>{{ mesero.email }}</td>
+                            <td>
+                                {% if mesero.is_active %}
+                                <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if mesero.last_login %}
+                                {{ mesero.last_login|date:"d/m/Y H:i" }}
+                                {% else %}
+                                <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/admin/usuarios/manejousuario/{{ mesero.id }}/change/" 
+                                       class="btn btn-warning" target="_blank" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if mesero.is_active %}
+                                    <a href="/admin/usuarios/manejousuario/{{ mesero.id }}/change/" 
+                                       class="btn btn-danger" target="_blank" title="Desactivar">
+                                        <i class="bi bi-person-x"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="/admin/usuarios/manejousuario/{{ mesero.id }}/change/" 
+                                       class="btn btn-success" target="_blank" title="Activar">
+                                        <i class="bi bi-person-check"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-people" style="font-size: 2rem;"></i>
+                                <p class="mt-2">No hay meseros registrados</p>
+                                <a href="{% url 'usuarios:registro_mesero' %}" class="btn btn-primary mt-2">
+                                    Crear primer mesero
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Meseros</h5>
+                    <p class="card-text display-4">{{ meseros.count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Activos</h5>
+                    <p class="card-text display-4 text-success">
+                        {{ meseros|length|add:"0" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Inactivos</h5>
+                    <p class="card-text display-4 text-danger">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Puedes añadir funcionalidad JavaScript aquí si es necesario
+    console.log('Página de meseros cargada');
+});
+</script>
+{% endblock %}
